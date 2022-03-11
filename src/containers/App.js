@@ -1,15 +1,28 @@
 import React, { useState, useEffect } from 'react';
+import { connect } from "react-redux"
 import './App.css'
 import CardList from "../components/CardList"
 import SearchBox from "../components/SearchBox"
 import Scroll from "../components/Scroll"
 import ErrorBoundy from "../components/ErrorBoundry"
 
-const App = () => {
+import { setSearchfield } from '../actions'
+
+const mapStateToProps = state => {
+    return {
+        searchField: state.searchField
+    }
+}
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        onSearchChange: (event) => dispatch(setSearchfield(event.target.value))
+    }
+}
+
+const App = (props) => {
 
     const [robots, setRobots] = useState([]);
-    const [searchfield, setSearchfield] = useState('');
-    const [count, setCount] = useState(0);
 
     useEffect(() => {
         fetch("https://jsonplaceholder.typicode.com/users")
@@ -17,17 +30,8 @@ const App = () => {
             .then(users => {
                 setRobots(users)
             })
-        console.log("Initial Effect")
+
     }, [])
-
-    useEffect(() => {
-        console.log(count)
-    }, [count])
-
-    const onSearchChange = (event) => {
-        setSearchfield(event.target.value)
-        // console.log("OnSearch")
-    }
 
     return (
         <>
@@ -36,11 +40,10 @@ const App = () => {
                     ? <h1>Loading</h1>
                     : <div className='tc' >
                         <h1 className='courier'>RoboFriends</h1>
-                        <SearchBox searchChange={onSearchChange} />
-                        <button onClick={() => setCount(count + 1)} >Click Me</button>
+                        <SearchBox searchChange={props.onSearchChange} />
                         <Scroll>
                             <ErrorBoundy>
-                                <CardList robots={robots.filter(robot => robot.name.toLowerCase().includes(searchfield.toLowerCase()))} />
+                                <CardList robots={robots.filter(robot => robot.name.toLowerCase().includes(props.searchField.toLowerCase()))} />
                             </ErrorBoundy>
                         </Scroll>
                     </div>
@@ -50,6 +53,6 @@ const App = () => {
 
 }
 
-export default App;
+export default connect(mapStateToProps, mapDispatchToProps)(App);
 
 
