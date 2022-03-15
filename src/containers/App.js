@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { connect } from "react-redux"
 import './App.css'
 import CardList from "../components/CardList"
@@ -6,44 +6,44 @@ import SearchBox from "../components/SearchBox"
 import Scroll from "../components/Scroll"
 import ErrorBoundy from "../components/ErrorBoundry"
 
-import { setSearchfield } from '../actions'
+import { setSearchfield, requestRobots } from '../actions'
+
 
 const mapStateToProps = state => {
     return {
-        searchField: state.searchField
+        searchField: state.searchRobots.searchField,
+        robots: state.requestRobots.robots,
+        isPending: state.requestRobots.isPending,
+        error: state.requestRobots.error
     }
 }
 
 const mapDispatchToProps = (dispatch) => {
     return {
-        onSearchChange: (event) => dispatch(setSearchfield(event.target.value))
+        onSearchChange: (event) => dispatch(setSearchfield(event.target.value)),
+        onRequestRobots: () => dispatch(requestRobots())
     }
 }
 
 const App = (props) => {
 
-    const [robots, setRobots] = useState([]);
+    // const [robots, setRobots] = useState([]);
 
     useEffect(() => {
-        fetch("https://jsonplaceholder.typicode.com/users")
-            .then(res => res.json())
-            .then(users => {
-                setRobots(users)
-            })
-
+        props.onRequestRobots()
     }, [])
 
     return (
         <>
             {
-                robots.length === 0
+                props.isPending
                     ? <h1>Loading</h1>
                     : <div className='tc' >
                         <h1 className='courier'>RoboFriends</h1>
                         <SearchBox searchChange={props.onSearchChange} />
                         <Scroll>
                             <ErrorBoundy>
-                                <CardList robots={robots.filter(robot => robot.name.toLowerCase().includes(props.searchField.toLowerCase()))} />
+                                <CardList robots={props.robots.filter(robot => robot.name.toLowerCase().includes(props.searchField.toLowerCase()))} />
                             </ErrorBoundy>
                         </Scroll>
                     </div>
